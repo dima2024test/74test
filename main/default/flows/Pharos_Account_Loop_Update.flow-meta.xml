@@ -131,7 +131,7 @@
         <inputParameters>
             <name>level</name>
             <value>
-                <stringValue>WARNING</stringValue>
+                <stringValue>FINE</stringValue>
             </value>
         </inputParameters>
         <inputParameters>
