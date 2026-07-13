@@ -5,7 +5,7 @@
         <name>Append_Contact_Name</name>
         <label>Append Contact Name</label>
         <locationX>270</locationX>
-        <locationY>2582</locationY>
+        <locationY>2690</locationY>
         <assignmentItems>
             <assignToReference>ContactNamesSummary</assignToReference>
             <operator>Add</operator>
@@ -223,6 +223,22 @@
             <targetReference>Search_Account_Screen</targetReference>
         </connector>
     </assignments>
+    <assignments>
+        <name>Track_Created_Contact_Id</name>
+        <label>Track Created Contact Id</label>
+        <locationX>270</locationX>
+        <locationY>2390</locationY>
+        <assignmentItems>
+            <assignToReference>CreatedContactIds</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>LastCreatedContactId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Create_Contacts</targetReference>
+        </connector>
+    </assignments>
     <decisions>
         <name>Account_Found_Decision</name>
         <label>Account Found?</label>
@@ -324,12 +340,37 @@
         </rules>
     </decisions>
     <decisions>
+        <name>Confirm_Or_Cancel_Decision</name>
+        <label>Confirm or Cancel?</label>
+        <locationX>182</locationX>
+        <locationY>3506</locationY>
+        <defaultConnector>
+            <targetReference>Confirmation_Screen</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Save</defaultConnectorLabel>
+        <rules>
+            <name>Cancel_Requested</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>ConfirmSave</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Delete_Created_Contacts</targetReference>
+            </connector>
+            <label>Cancel</label>
+        </rules>
+    </decisions>
+    <decisions>
         <name>Want_Opportunity_Decision</name>
         <label>Create an Opportunity?</label>
         <locationX>182</locationX>
-        <locationY>2882</locationY>
+        <locationY>2990</locationY>
         <defaultConnector>
-            <targetReference>Confirmation_Screen</targetReference>
+            <targetReference>Review_Screen</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>No</defaultConnectorLabel>
         <rules>
@@ -359,7 +400,7 @@
         <name>Loop_Build_Contact_Summary</name>
         <label>Loop Build Contact Summary</label>
         <locationX>182</locationX>
-        <locationY>2474</locationY>
+        <locationY>2582</locationY>
         <collectionReference>ContactsToCreate</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -432,8 +473,9 @@
         <label>Create Contact</label>
         <locationX>270</locationX>
         <locationY>2282</locationY>
+        <assignRecordIdToReference>LastCreatedContactId</assignRecordIdToReference>
         <connector>
-            <targetReference>Loop_Create_Contacts</targetReference>
+            <targetReference>Track_Created_Contact_Id</targetReference>
         </connector>
         <inputAssignments>
             <field>AccountId</field>
@@ -468,12 +510,29 @@
         <object>Contact</object>
     </recordCreates>
     <recordCreates>
+        <name>Create_Opp</name>
+        <label>Create Opp</label>
+        <locationX>50</locationX>
+        <locationY>3938</locationY>
+        <inputAssignments>
+            <field>CloseDate</field>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Name</field>
+        </inputAssignments>
+        <inputAssignments>
+            <field>StageName</field>
+        </inputAssignments>
+        <object>Opportunity</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordCreates>
         <name>Create_Opportunity</name>
         <label>Create Opportunity</label>
         <locationX>50</locationX>
-        <locationY>3098</locationY>
+        <locationY>3206</locationY>
         <connector>
-            <targetReference>Confirmation_Screen</targetReference>
+            <targetReference>Review_Screen</targetReference>
         </connector>
         <inputAssignments>
             <field>AccountId</field>
@@ -507,6 +566,24 @@
         </inputAssignments>
         <object>Opportunity</object>
     </recordCreates>
+    <recordDeletes>
+        <name>Delete_Created_Contacts</name>
+        <label>Delete Created Contacts</label>
+        <locationX>50</locationX>
+        <locationY>3614</locationY>
+        <connector>
+            <targetReference>Rollback_Changes</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>In</operator>
+            <value>
+                <elementReference>CreatedContactIds</elementReference>
+            </value>
+        </filters>
+        <object>Contact</object>
+    </recordDeletes>
     <recordLookups>
         <name>Find_Account_Candidates</name>
         <label>Find Account Candidates</label>
@@ -530,10 +607,29 @@
         <queriedFields>Name</queriedFields>
     </recordLookups>
     <screens>
+        <name>Cancelled_Screen</name>
+        <label>Cancelled</label>
+        <locationX>50</locationX>
+        <locationY>3830</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Create_Opp</targetReference>
+        </connector>
+        <fields>
+            <name>CancelledMessage</name>
+            <fieldText>&lt;p&gt;Onboarding cancelled. Any Contacts created in this session were deleted, and the transaction has been rolled back.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
         <name>Confirmation_Screen</name>
         <label>Confirmation</label>
-        <locationX>182</locationX>
-        <locationY>3290</locationY>
+        <locationX>314</locationX>
+        <locationY>3614</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
@@ -688,7 +784,7 @@
         <name>Opportunity_Details_Screen</name>
         <label>Opportunity Details</label>
         <locationX>50</locationX>
-        <locationY>2990</locationY>
+        <locationY>3098</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -724,7 +820,7 @@
         <name>Opportunity_Prompt_Screen</name>
         <label>Add an Opportunity?</label>
         <locationX>182</locationX>
-        <locationY>2774</locationY>
+        <locationY>2882</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -735,6 +831,35 @@
             <name>WantsOpportunity</name>
             <dataType>Boolean</dataType>
             <fieldText>Would you like to create an Opportunity for this Account?</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Review_Screen</name>
+        <label>Review &amp; Confirm</label>
+        <locationX>182</locationX>
+        <locationY>3398</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <connector>
+            <targetReference>Confirm_Or_Cancel_Decision</targetReference>
+        </connector>
+        <fields>
+            <name>ReviewSummary</name>
+            <fieldText>&lt;p&gt;{!SummaryText}&lt;/p&gt;&lt;p&gt;Save these changes?&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>ConfirmSave</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Yes, save. (Uncheck to cancel and discard everything created in this session.)</fieldText>
             <fieldType>InputField</fieldType>
             <isRequired>true</isRequired>
         </fields>
@@ -770,7 +895,7 @@
             <targetReference>Init_Variables</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>AccountCandidates</name>
         <dataType>SObject</dataType>
@@ -817,6 +942,20 @@
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <objectType>Contact</objectType>
+    </variables>
+    <variables>
+        <name>CreatedContactIds</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>LastCreatedContactId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
     </variables>
     <variables>
         <name>var_AccountId</name>
