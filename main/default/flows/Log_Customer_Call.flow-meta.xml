@@ -12,15 +12,15 @@
     <processMetadataValues>
         <name>CanvasMode</name>
         <value>
-            <stringValue>FREE_FORM_CANVAS</stringValue>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
         </value>
     </processMetadataValues>
     <processType>Flow</processType>
     <recordCreates>
-        <name>Create23423ref</name>
-        <label>Create23423ref</label>
-        <locationX>1071</locationX>
-        <locationY>667</locationY>
+        <name>Createfdsfgsdgf</name>
+        <label>Createfdsfgsdgf</label>
+        <locationX>176</locationX>
+        <locationY>458</locationY>
         <inputAssignments>
             <field>CloseDate</field>
         </inputAssignments>
@@ -36,8 +36,8 @@
     <screens>
         <name>Call_Details_Screen</name>
         <label>Call Details</label>
-        <locationX>174</locationX>
-        <locationY>215</locationY>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -71,13 +71,13 @@
     <screens>
         <name>Confirmation_Screen</name>
         <label>Confirmation</label>
-        <locationX>650</locationX>
-        <locationY>497</locationY>
+        <locationX>176</locationX>
+        <locationY>350</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Create23423ref</targetReference>
+            <targetReference>Createfdsfgsdgf</targetReference>
         </connector>
         <fields>
             <name>ConfirmationMessage</name>
@@ -98,8 +98,8 @@
     <subflows>
         <name>Call_Log_Subflow</name>
         <label>Log the Call</label>
-        <locationX>716</locationX>
-        <locationY>194</locationY>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
         <connector>
             <targetReference>Confirmation_Screen</targetReference>
         </connector>
