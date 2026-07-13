@@ -34,6 +34,12 @@
                 <elementReference>CallSubject</elementReference>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <field>WhoId</field>
+            <value>
+                <elementReference>ContactId</elementReference>
+            </value>
+        </inputAssignments>
         <object>Task</object>
     </recordCreates>
     <start>
@@ -86,6 +92,13 @@
     </variables>
     <variables>
         <name>CallSubject</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>ContactId</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>

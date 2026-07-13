@@ -1,8 +1,231 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>60.0</apiVersion>
+    <assignments>
+        <name>Assign_Matched_Contact</name>
+        <label>Assign Matched Contact</label>
+        <locationX>138</locationX>
+        <locationY>890</locationY>
+        <assignmentItems>
+            <assignToReference>var_ContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Through_Contacts.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Through_Contacts</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Increment_Call_Counter</name>
+        <label>Increment Call Counter</label>
+        <locationX>182</locationX>
+        <locationY>1358</locationY>
+        <assignmentItems>
+            <assignToReference>CallsLoggedCount</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <numberValue>1.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Check_Contact_For_Update</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Init_Session</name>
+        <label>Initialize Session</label>
+        <locationX>182</locationX>
+        <locationY>134</locationY>
+        <assignmentItems>
+            <assignToReference>CallsLoggedCount</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <numberValue>0.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Call_Details_Screen</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Reset_For_Next_Call</name>
+        <label>Reset For Next Call</label>
+        <locationX>50</locationX>
+        <locationY>2390</locationY>
+        <assignmentItems>
+            <assignToReference>var_ContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue></stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Call_Details_Screen</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Check_Contact_For_Update</name>
+        <label>Contact Matched?</label>
+        <locationX>182</locationX>
+        <locationY>1466</locationY>
+        <defaultConnector>
+            <targetReference>Want_Followup_Decision</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No Contact</defaultConnectorLabel>
+        <rules>
+            <name>Contact_Matched</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>var_ContactId</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Update_Contact_Last_Contacted</targetReference>
+            </connector>
+            <label>Matched</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Check_Contact_Match</name>
+        <label>Is Contact Match?</label>
+        <locationX>270</locationX>
+        <locationY>782</locationY>
+        <defaultConnector>
+            <targetReference>Loop_Through_Contacts</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No Match</defaultConnectorLabel>
+        <rules>
+            <name>Is_Match</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Loop_Through_Contacts.LastName</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <elementReference>SearchLastName</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_Matched_Contact</targetReference>
+            </connector>
+            <label>Match</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Check_Log_Another</name>
+        <label>Log Another Call?</label>
+        <locationX>182</locationX>
+        <locationY>2282</locationY>
+        <defaultConnector>
+            <targetReference>Session_Complete_Screen</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No, Done</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Log_Another</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>LogAnotherCall</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Reset_For_Next_Call</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Check_Search_Provided</name>
+        <label>Search Provided?</label>
+        <locationX>182</locationX>
+        <locationY>458</locationY>
+        <defaultConnector>
+            <targetReference>Call_Log_Subflow</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Skip Search</defaultConnectorLabel>
+        <rules>
+            <name>Search_Provided</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>SearchLastName</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Find_Contacts</targetReference>
+            </connector>
+            <label>Provided</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Want_Followup_Decision</name>
+        <label>Follow-up Needed?</label>
+        <locationX>182</locationX>
+        <locationY>1766</locationY>
+        <defaultConnector>
+            <targetReference>Confirmation_Screen</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Followup</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>FollowUpNeeded</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Followup_Details_Screen</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+    <formulas>
+        <name>CallSummary</name>
+        <dataType>String</dataType>
+        <expression>&quot;Call logged. Task Id: &quot; &amp; {!ParentTaskId} &amp; IF({!FollowUpNeeded}, &quot; A follow-up task has been scheduled.&quot;, &quot;&quot;) &amp; &quot; You&apos;ve logged &quot; &amp; TEXT({!CallsLoggedCount}) &amp; &quot; call(s) this session.&quot;</expression>
+    </formulas>
+    <formulas>
+        <name>ContactUpdateNote</name>
+        <dataType>String</dataType>
+        <expression>&quot;Last contacted on &quot; &amp; TEXT(TODAY()) &amp; &quot; regarding: &quot; &amp; {!CallSubject}</expression>
+    </formulas>
+    <formulas>
+        <name>FollowupDescription</name>
+        <dataType>String</dataType>
+        <expression>&quot;Follow-up for call with &quot; &amp; {!CallerName}</expression>
+    </formulas>
+    <formulas>
+        <name>FollowupSubject</name>
+        <dataType>String</dataType>
+        <expression>&quot;Follow-up: &quot; &amp; {!CallSubject}</expression>
+    </formulas>
     <interviewLabel>Log Customer Call {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Log Customer Call</label>
+    <loops>
+        <name>Loop_Through_Contacts</name>
+        <label>Loop Through Contacts</label>
+        <locationX>50</locationX>
+        <locationY>674</locationY>
+        <collectionReference>ContactCandidates</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Check_Contact_Match</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Call_Log_Subflow</targetReference>
+        </noMoreValuesConnector>
+    </loops>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -17,10 +240,50 @@
     </processMetadataValues>
     <processType>Flow</processType>
     <recordCreates>
-        <name>Createfdsfgsdgf</name>
-        <label>Createfdsfgsdgf</label>
-        <locationX>176</locationX>
-        <locationY>458</locationY>
+        <name>Create_Followup_Task</name>
+        <label>Create Follow-up Task</label>
+        <locationX>50</locationX>
+        <locationY>1982</locationY>
+        <connector>
+            <targetReference>Confirmation_Screen</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>ActivityDate</field>
+            <value>
+                <elementReference>FollowUpDate</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Description</field>
+            <value>
+                <elementReference>FollowupDescription</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value>
+                <stringValue>Not Started</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Subject</field>
+            <value>
+                <elementReference>FollowupSubject</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>WhoId</field>
+            <value>
+                <elementReference>var_ContactId</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Task</object>
+    </recordCreates>
+    <recordCreates>
+        <name>efssefefef</name>
+        <label>efssefefe</label>
+        <locationX>314</locationX>
+        <locationY>2498</locationY>
         <inputAssignments>
             <field>CloseDate</field>
         </inputAssignments>
@@ -33,16 +296,63 @@
         <object>Opportunity</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordCreates>
+    <recordLookups>
+        <name>Find_Contacts</name>
+        <label>Find Contacts</label>
+        <locationX>50</locationX>
+        <locationY>566</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Loop_Through_Contacts</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>LastName</field>
+            <operator>Contains</operator>
+            <value>
+                <elementReference>SearchLastName</elementReference>
+            </value>
+        </filters>
+        <object>Contact</object>
+        <outputReference>ContactCandidates</outputReference>
+        <queriedFields>Id</queriedFields>
+        <queriedFields>FirstName</queriedFields>
+        <queriedFields>LastName</queriedFields>
+    </recordLookups>
+    <recordUpdates>
+        <name>Update_Contact_Last_Contacted</name>
+        <label>Update Contact Last Contacted</label>
+        <locationX>50</locationX>
+        <locationY>1574</locationY>
+        <connector>
+            <targetReference>Want_Followup_Decision</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>var_ContactId</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Description</field>
+            <value>
+                <elementReference>ContactUpdateNote</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Contact</object>
+    </recordUpdates>
     <screens>
         <name>Call_Details_Screen</name>
         <label>Call Details</label>
-        <locationX>176</locationX>
-        <locationY>134</locationY>
+        <locationX>182</locationX>
+        <locationY>242</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>Call_Log_Subflow</targetReference>
+            <targetReference>Search_Contact_Screen</targetReference>
         </connector>
         <fields>
             <name>CallerName</name>
@@ -65,43 +375,119 @@
             <fieldType>InputField</fieldType>
             <isRequired>true</isRequired>
         </fields>
+        <fields>
+            <name>FollowUpNeeded</name>
+            <dataType>Boolean</dataType>
+            <fieldText>Does this call need a follow-up?</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
     <screens>
         <name>Confirmation_Screen</name>
         <label>Confirmation</label>
-        <locationX>176</locationX>
-        <locationY>350</locationY>
+        <locationX>182</locationX>
+        <locationY>2174</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Createfdsfgsdgf</targetReference>
+            <targetReference>Check_Log_Another</targetReference>
         </connector>
         <fields>
             <name>ConfirmationMessage</name>
-            <fieldText>&lt;p&gt;Call logged. Task Id: {!ParentTaskId}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;{!CallSummary}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>LogAnotherCall</name>
+            <dataType>Boolean</dataType>
+            <fieldText>Log another call?</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Followup_Details_Screen</name>
+        <label>Follow-up Details</label>
+        <locationX>50</locationX>
+        <locationY>1874</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <connector>
+            <targetReference>Create_Followup_Task</targetReference>
+        </connector>
+        <fields>
+            <name>FollowUpDate</name>
+            <dataType>Date</dataType>
+            <fieldText>Follow-up Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Search_Contact_Screen</name>
+        <label>Link to a Contact</label>
+        <locationX>182</locationX>
+        <locationY>350</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <connector>
+            <targetReference>Check_Search_Provided</targetReference>
+        </connector>
+        <fields>
+            <name>SearchLastName</name>
+            <dataType>String</dataType>
+            <fieldText>Contact Last Name (optional)</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>&lt;p&gt;If this call relates to an existing Contact, enter their last name to link the Task. Leave blank to skip.&lt;/p&gt;</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Session_Complete_Screen</name>
+        <label>Session Complete</label>
+        <locationX>314</locationX>
+        <locationY>2390</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>efssefefef</targetReference>
+        </connector>
+        <fields>
+            <name>SessionCompleteMessage</name>
+            <fieldText>&lt;p&gt;All done. Thanks for logging your calls!&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
     <start>
-        <locationX>50</locationX>
+        <locationX>56</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Call_Details_Screen</targetReference>
+            <targetReference>Init_Session</targetReference>
         </connector>
     </start>
     <status>Active</status>
     <subflows>
         <name>Call_Log_Subflow</name>
         <label>Log the Call</label>
-        <locationX>176</locationX>
-        <locationY>242</locationY>
+        <locationX>182</locationX>
+        <locationY>1250</locationY>
         <connector>
-            <targetReference>Confirmation_Screen</targetReference>
+            <targetReference>Increment_Call_Counter</targetReference>
         </connector>
         <flowName>Log_Call_Subflow</flowName>
         <inputAssignments>
@@ -122,13 +508,42 @@
                 <elementReference>CallNotes</elementReference>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <name>ContactId</name>
+            <value>
+                <elementReference>var_ContactId</elementReference>
+            </value>
+        </inputAssignments>
         <outputAssignments>
             <assignToReference>ParentTaskId</assignToReference>
             <name>CreatedTaskId</name>
         </outputAssignments>
     </subflows>
     <variables>
+        <name>CallsLoggedCount</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    <variables>
+        <name>ContactCandidates</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Contact</objectType>
+    </variables>
+    <variables>
         <name>ParentTaskId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>var_ContactId</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
